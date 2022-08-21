@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.11490787269681742" />
+        <entry key="../../.gradle/caches/transforms-3/9d6778b007a14e0c6659deb3da7018f2/transformed/material-1.6.1/res/layout/design_bottom_sheet_dialog.xml" value="0.1" />
+        <entry key="..\:/Users/xindeng.deng/AndroidStudioProjects/AlarmApplication/app/src/main/res/layout/activity_main.xml" value="0.3536458333333333" />
+        <entry key="..\:/Users/xindeng.deng/AndroidStudioProjects/AlarmApplication/app/src/main/res/layout/alarm_item.xml" value="0.25" />
+        <entry key="..\:/Users/xindeng.deng/AndroidStudioProjects/AlarmApplication/app/src/main/res/layout/fragment_alarm_list.xml" value="0.175" />
+        <entry key="app/src/main/res/drawable/aaa.xml" value="0.1615" />
+        <entry key="app/src/main/res/drawable/background.xml" value="0.1615" />
+        <entry key="app/src/main/res/drawable/round_big.xml" value="0.19" />
+        <entry key="app/src/main/res/layout/alarm_item.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/fragment_alarm_add.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/fragment_alarm_list.xml" value="0.29483695652173914" />
+        <entry key="app/src/main/res/layout/remark_add.xml" value="0.321875" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
