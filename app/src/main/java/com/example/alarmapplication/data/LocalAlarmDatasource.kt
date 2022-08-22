@@ -1,0 +1,75 @@
+package com.example.alarmapplication.data
+
+import android.content.Context
+import androidx.room.*
+import dagger.Binds
+import dagger.Module
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class LocalAlarmDatasource : AlarmDataSource {
+
+    private var applicationContext: Context
+    private var dataBase: AlarmDataBase
+
+    @Inject
+    constructor(applicationContext: Context) {
+        this.applicationContext = applicationContext
+        this.dataBase = AlarmDataBase.getInstance(applicationContext)
+    }
+
+    override fun getAllAlarm(): Flow<List<Alarm>> = dataBase.alarmDao().getAll()
+
+    override suspend fun addAlarm(alarm: Alarm) = dataBase.alarmDao().insertAll(alarm)
+
+    override suspend fun removeAlarm(alarm: Alarm) = dataBase.alarmDao().delete(alarm)
+
+    override suspend fun updateAlarm(alarm: Alarm) = dataBase.alarmDao().update(alarm)
+}
+
+@Dao
+interface AlarmDao {
+    @Query("select * from alarm")
+    fun getAll(): Flow<List<Alarm>>
+
+    @Insert
+    suspend fun insertAll(vararg alarm: Alarm)
+
+    @Delete
+    suspend fun delete(alarm: Alarm)
+
+    @Update
+    suspend fun update(alarm: Alarm)
+}
+
+@Database(entities = [Alarm::class], version = 1, exportSchema = false)
+abstract class AlarmDataBase : RoomDatabase() {
+    companion object {
+        const val DATABASE_NAME = "alarm-db"
+
+        @Volatile
+        private var instance: AlarmDataBase? = null
+        fun getInstance(context: Context): AlarmDataBase {
+            return instance ?: synchronized(this) {
+                instance ?: buildDatabase(context).also { instance = it }
+            }
+        }
+
+        private fun buildDatabase(context: Context): AlarmDataBase {
+            return Room.databaseBuilder(
+                context, AlarmDataBase::class.java,
+                DATABASE_NAME
+            ).build()
+        }
+
+
+    }
+
+    abstract fun alarmDao(): AlarmDao
+}
+
+@Module
+interface DataSourceModule {
+    @Binds
+    fun bindAlarmDataSource(dataSource: LocalAlarmDatasource): AlarmDataSource
+}

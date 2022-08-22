@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/alarmListFragment">
+
+    <fragment
+        android:id="@+id/alarmListFragment"
+        android:name="com.example.alarmapplication.ui.AlarmListFragment"
+        android:label="fragment_alarm_list"
+        tools:layout="@layout/fragment_alarm_list" >
+        <action
+            android:id="@+id/action_alarmListFragment_to_alarmAddFragment"
+            app:destination="@id/alarmAddFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/alarmAddFragment"
+        android:name="com.example.alarmapplication.ui.AlarmAddFragment"
+        android:label="fragment_alarm_add"
+        tools:layout="@layout/fragment_alarm_add" >
+        <argument
+            android:name="alarm"
+            app:argType="com.example.alarmapplication.data.Alarm"
+            app:nullable="true" />
+    </fragment>
+</navigation>
