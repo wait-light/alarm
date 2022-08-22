@@ -21,6 +21,7 @@ import com.example.alarmapplication.databinding.FragmentAlarmListBinding
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.log
 
 class AlarmListFragment : Fragment() {
     lateinit var binding: FragmentAlarmListBinding
@@ -50,16 +51,10 @@ class AlarmListFragment : Fragment() {
         binding = FragmentAlarmListBinding.inflate(inflater, container, false)
         binding.apply {
             adapter = Adapter()
-            root.layoutManager = LinearLayoutManager(context)
-            root.adapter = adapter
-        }
-        GlobalScope.launch {
-            alarmListViewModel.getAllAlarm().collect() {
-                data.clear()
-                data.addAll(it)
-                requireActivity().runOnUiThread {
-                    adapter.notifyDataSetChanged()
-                }
+            alarmList.layoutManager = LinearLayoutManager(context)
+            alarmList.adapter = adapter
+            addAlarm.setOnClickListener {
+                navController.navigate(AlarmListFragmentDirections.actionAlarmListFragmentToAlarmAddFragment())
             }
         }
         return binding.root
@@ -84,10 +79,34 @@ class AlarmListFragment : Fragment() {
                 timePeriod.setText(if (alarm.localTime.hour < 12) "上午" else "下午")
                 time.setText(alarm.localTime.toString())
                 enable.isChecked = alarm.enable
+                enable.setOnClickListener {
+                    alarm.enable = enable.isChecked
+                    GlobalScope.launch {
+                        alarmListViewModel.updateAlarm(alarm)
+                    }
+                }
             }
         }
 
         override fun getItemCount(): Int = data.size
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
+
+    }
+
+    private fun loadData() {
+        GlobalScope.launch {
+            alarmListViewModel.getAllAlarm().collect() {
+                data.clear()
+                data.addAll(it)
+                requireActivity().runOnUiThread {
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
     }
 
     class ViewHolder(val binding: AlarmItemBinding) :

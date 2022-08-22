@@ -14,14 +14,14 @@ import javax.inject.Singleton
 @Entity
 @TypeConverters(LocalTimeConvert::class)
 data class Alarm(
-    @PrimaryKey(autoGenerate = true) val id: Int,
-    val localTime: LocalTime,
-    @AlarmRepeat val repeat: Int,
-    val ring: String,
-    val vibration: Boolean,
-    val autoDelete: Boolean,
-    val remark: String,
-    val enable: Boolean
+    @PrimaryKey(autoGenerate = true) var id: Int,
+    var localTime: LocalTime,
+    @AlarmRepeat var repeat: Int,
+    var ring: String,
+    var vibration: Boolean,
+    var autoDelete: Boolean,
+    var remark: String,
+    var enable: Boolean
 ) : Serializable
 
 class LocalTimeConvert {

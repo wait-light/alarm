@@ -116,7 +116,6 @@ class AlarmAddFragment : Fragment() {
 
             }
             check.setOnClickListener {
-//                getPickerTime().toString().shotToast(requireContext())
                 GlobalScope.launch {
                     alarmItemViewModel.addAlarm(
                         Alarm(

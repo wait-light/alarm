@@ -9,4 +9,5 @@ class AlarmListViewModel @Inject constructor() : ViewModel() {
     lateinit var alarmRepository: AlarmRepository
 
     fun getAllAlarm(): Flow<List<Alarm>> = alarmRepository.getAllAlarm()
+    suspend fun updateAlarm(alarm: Alarm) = alarmRepository.updateAlarm(alarm)
 }
