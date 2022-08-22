@@ -14,28 +14,32 @@ abstract class AlarmStrategyModule {
     @IntoMap
     @IntKey(AlarmRepeat.ONE_TIME)
     @Binds
-    abstract fun bindOneTimeAlarmRepeatStrategy(alarmRepeatStrategyFactory: OneTimeAlarmRepeatStrategy): AlarmRepeatStrategy
+    abstract fun bindOneTimeAlarmRepeatStrategy(alarmRepeatStrategy: OneTimeAlarmRepeatStrategy): AlarmRepeatStrategy
 
     @IntoMap
     @IntKey(AlarmRepeat.MONDAY2FRIDAY)
     @Binds
-    abstract fun bindMonday2FridayAlarmRepeatStrategy(alarmRepeatStrategyFactory: Monday2FridayAlarmRepeatStrategy): AlarmRepeatStrategy
+    abstract fun bindMonday2FridayAlarmRepeatStrategy(alarmRepeatStrategy: Monday2FridayAlarmRepeatStrategy): AlarmRepeatStrategy
 
-    companion object {
-//        @IntoMap
-//        @IntKey(AlarmRepeat.ONE_TIME)
-//        @Provides
-//        fun provideOneTimeAlarmRepeatStrategy(): AlarmRepeatStrategy {
-//            return OneTimeAlarmRepeatStrategy()
-//        }
+    @IntoMap
+    @Binds
+    @IntKey(AlarmRepeat.WORKING_DAY)
+    abstract fun bindWorkingDayAlarmRepeatStrategy(alarmRepeatStrategy: WorkingDayAlarmRepeatStrategy): AlarmRepeatStrategy
 
-//        @IntoMap
-//        @IntKey(AlarmRepeat.MONDAY2FRIDAY)
-//        @Provides
-//        fun provideMonday2FridayAlarmRepeatStrategy(): AlarmRepeatStrategy {
-//            return Monday2FridayAlarmRepeatStrategy()
-//        }
-    }
+    @IntoMap
+    @Binds
+    @IntKey(AlarmRepeat.EVERYDAY)
+    abstract fun bindEverydayAlarmRepeatStrategy(alarmRepeatStrategy: EverydayAlarmRepeatStrategy): AlarmRepeatStrategy
+
+    @IntoMap
+    @Binds
+    @IntKey(AlarmRepeat.STATUTORY_HOLIDAYS)
+    abstract fun bindStatutoryHolidaysAlarmRepeatStrategy(alarmRepeatStrategy: StatutoryHolidaysAlarmRepeatStrategy): AlarmRepeatStrategy
+
+    @IntoMap
+    @Binds
+    @IntKey(AlarmRepeat.REWARD)
+    abstract fun bindRewardAlarmRepeatStrategy(alarmRepeatStrategy: RewardAlarmRepeatStrategy): AlarmRepeatStrategy
 
 
 }

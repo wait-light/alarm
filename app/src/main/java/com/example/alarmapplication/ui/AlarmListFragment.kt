@@ -57,11 +57,10 @@ class AlarmListFragment : Fragment() {
             alarmListViewModel.getAllAlarm().collect() {
                 data.clear()
                 data.addAll(it)
-                adapter.notifyDataSetChanged()
+                requireActivity().runOnUiThread {
+                    adapter.notifyDataSetChanged()
+                }
             }
-        }
-        (alarmRepeatStrategyFactory as AlarmRepeatStrategyFactoryImpl).strategies.forEach { a, b ->
-            Log.e("TAG", "onCreateView: $a  $b")
         }
         return binding.root
     }

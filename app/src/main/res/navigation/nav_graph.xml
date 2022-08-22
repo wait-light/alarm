@@ -15,8 +15,8 @@
             app:destination="@id/alarmAddFragment"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/slide_in_left"
-            app:popExitAnim="@android:anim/slide_out_right" />
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/alarmAddFragment"
@@ -26,6 +26,7 @@
         <argument
             android:name="alarm"
             app:argType="com.example.alarmapplication.data.Alarm"
-            app:nullable="true" />
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 </navigation>

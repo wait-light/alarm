@@ -43,10 +43,10 @@ interface AlarmRepeatStrategyFactory {
     fun getAlarmStrategy(@AlarmRepeat alarmRepeat: Int)
 }
 
-class AlarmRepeatStrategyFactoryImpl constructor() :
+class AlarmRepeatStrategyFactoryImpl @Inject constructor() :
     AlarmRepeatStrategyFactory {
     @Inject
-    lateinit var strategies: Map<Int, AlarmRepeatStrategy>
+    lateinit var strategies: Map<Int, @JvmSuppressWildcards AlarmRepeatStrategy>
     override fun getAlarmStrategy(alarmRepeat: Int) {
         TODO("Not yet implemented")
     }
@@ -64,25 +64,25 @@ class Monday2FridayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrate
     }
 }
 
-class WorkingDayAlarmRepeatStrategy : AlarmRepeatStrategy {
+class WorkingDayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     override fun onAlarm(alarm: Alarm) {
         TODO("Not yet implemented")
     }
 }
 
-class EverydayAlarmRepeatStrategy : AlarmRepeatStrategy {
+class EverydayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     override fun onAlarm(alarm: Alarm) {
         TODO("Not yet implemented")
     }
 }
 
-class StatutoryHolidaysAlarmRepeatStrategy : AlarmRepeatStrategy {
+class StatutoryHolidaysAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     override fun onAlarm(alarm: Alarm) {
         TODO("Not yet implemented")
     }
 }
 
-class RewardAlarmRepeatStrategy : AlarmRepeatStrategy {
+class RewardAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     override fun onAlarm(alarm: Alarm) {
         TODO("Not yet implemented")
     }
