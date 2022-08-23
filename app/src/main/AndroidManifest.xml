@@ -17,6 +17,7 @@
         <receiver android:name=".data.AlarmReceiver">
 
         </receiver>
+        <service android:name=".data.AlarmService"></service>
         <activity
             android:name=".MainActivity2"
             android:exported="false" />

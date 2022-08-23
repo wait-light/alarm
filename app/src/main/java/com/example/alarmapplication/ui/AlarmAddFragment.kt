@@ -52,11 +52,13 @@ class AlarmAddFragment : Fragment() {
         val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
         alarmService.set(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            5000L,
-            PendingIntent.getBroadcast(
+            3000L,
+            PendingIntent.getService(
                 context,
                 1,
-                Intent(requireContext(), AlarmReceiver::class.java),
+                Intent(requireContext(), AlarmService::class.java).apply {
+                    setAction(AlarmReceiver.ACTION_START)
+                },
                 PendingIntent.FLAG_IMMUTABLE
             )
         )
