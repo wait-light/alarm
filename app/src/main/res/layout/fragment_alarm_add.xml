@@ -6,48 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.AlarmAddFragment">
 
-    <ImageView
-        android:id="@+id/close"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tools"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:src="@drawable/close"
-        app:layout_constraintBottom_toBottomOf="@id/next_time"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></ImageView>
-
-    <TextView
-        android:id="@+id/tips"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="添加闹钟"
-        android:textAlignment="center"
-        android:textSize="@dimen/big_title_font_size"
-        android:textStyle="bold"
-        app:layout_constraintLeft_toRightOf="@id/close"
-        app:layout_constraintRight_toLeftOf="@id/check"
-        app:layout_constraintTop_toTopOf="parent"></TextView>
-
-    <TextView
-        android:id="@+id/next_time"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="xx小时xx分钟后响铃"
-        android:textAlignment="center"
-        app:layout_constraintLeft_toRightOf="@id/close"
-        app:layout_constraintRight_toLeftOf="@id/check"
-        app:layout_constraintTop_toBottomOf="@id/tips"></TextView>
-
-    <ImageView
-        android:id="@+id/check"
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:src="@drawable/check"
-        app:layout_constraintBottom_toBottomOf="@id/next_time"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"></ImageView>
+        app:layout_constraintTop_toTopOf="parent"></androidx.appcompat.widget.Toolbar>
 
     <NumberPicker
         android:id="@+id/time_period"
@@ -57,7 +20,7 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/time_hour"
-        app:layout_constraintTop_toBottomOf="@id/next_time"></NumberPicker>
+        app:layout_constraintTop_toBottomOf="@id/tools"></NumberPicker>
 
     <NumberPicker
         android:id="@+id/time_hour"
@@ -67,7 +30,16 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/time_period"
         app:layout_constraintRight_toLeftOf="@id/time_minute"
-        app:layout_constraintTop_toBottomOf="@id/next_time"></NumberPicker>
+        app:layout_constraintTop_toBottomOf="@id/tools"></NumberPicker>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="-25dp"
+        android:text="时"
+        app:layout_constraintBottom_toBottomOf="@id/time_hour"
+        app:layout_constraintLeft_toRightOf="@id/time_hour"
+        app:layout_constraintTop_toTopOf="@id/time_hour"></TextView>
 
     <NumberPicker
         android:id="@+id/time_minute"
@@ -77,8 +49,16 @@
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/time_hour"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/next_time"></NumberPicker>
+        app:layout_constraintTop_toBottomOf="@id/tools"></NumberPicker>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="-25dp"
+        android:text="分"
+        app:layout_constraintBottom_toBottomOf="@id/time_minute"
+        app:layout_constraintLeft_toRightOf="@id/time_minute"
+        app:layout_constraintTop_toTopOf="@id/time_minute"></TextView>
 
     <LinearLayout
         android:id="@+id/ring"
@@ -190,4 +170,13 @@
             android:layout_height="wrap_content"
             android:textAlignment="viewEnd"></TextView>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="添加"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/remark_wrapper"></Button>
 </androidx.constraintlayout.widget.ConstraintLayout>

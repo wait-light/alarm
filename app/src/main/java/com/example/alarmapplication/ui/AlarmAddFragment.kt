@@ -1,19 +1,24 @@
 package com.example.alarmapplication.ui
 
+import android.app.AlarmManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.R
 import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.FragmentAlarmAddBinding
+import com.example.alarmapplication.databinding.RemarkAddBinding
 import com.example.alarmapplication.ui.component.LineRadioGroup
 import com.example.alarmapplication.util.sp2px
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -21,7 +26,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
-import kotlin.math.log
 
 class AlarmAddFragment : Fragment() {
     lateinit var binding: FragmentAlarmAddBinding
@@ -44,24 +48,21 @@ class AlarmAddFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
-//        val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
-//        alarmService.set(
-//            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//            5000L,
-//            "asdf",
-//            object : AlarmManager.OnAlarmListener {
-//                override fun onAlarm() {
-//                    Log.d(TAG, "onAlarm: xxxxxxxxxx")
-//                }
-//            },
-//            null
-//        )
+        val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
+        alarmService.set(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            5000L,
+            "asdf",
+            object : AlarmManager.OnAlarmListener {
+                override fun onAlarm() {
+                    Log.d(TAG, "onAlarm: xxxxxxxxxx")
+                }
+            },
+            null
+        )
+
         super.onCreate(savedInstanceState)
         navController = findNavController()
-        Log.d(
-            TAG,
-            "onCreate: xxxx${(alarmRepeatStrategyFactory as AlarmRepeatStrategyFactoryImpl).strategies}"
-        )
     }
 
     private fun observe() {
@@ -73,8 +74,15 @@ class AlarmAddFragment : Fragment() {
                     timeMinute.value = localTime.minute
                     vibration.isChecked = it.vibration
                     remark.text = it.remark
-                    repeat.text = it.repeat.toString()
+                    repeat.text = AlarmRepeat.NAME_TYPE_PAIRS[it.repeat].first
                 }
+            }
+        }
+        alarmItemViewModel.isAddAlarm.observe(viewLifecycleOwner) {
+            if (it!!) {
+                binding.check.setText("添加")
+            } else {
+                binding.check.setText("更新")
             }
         }
     }
@@ -83,9 +91,17 @@ class AlarmAddFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        args.alarm?.let { alarmItemViewModel.updateCurrentAlarm(it) }
-        observe()
+        args.alarm?.let {
+            alarmItemViewModel.apply {
+                setNotAddAlarm()
+                updateCurrentAlarm(it)
+            }
+        }
         binding = FragmentAlarmAddBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    private fun bind() {
         binding.apply {
             val pickerTextSize = context?.let { 30f.sp2px(it) } ?: 20f
             val pickerDividerHeight = 0
@@ -113,66 +129,91 @@ class AlarmAddFragment : Fragment() {
                 descendantFocusability = pickerDescendantFocusability
                 selectionDividerHeight = pickerDividerHeight
                 textSize = pickerTextSize
-
             }
             check.setOnClickListener {
-                GlobalScope.launch {
-                    alarmItemViewModel.addAlarm(
-                        Alarm(
-                            0,
-                            getPickerTime(),
-                            AlarmRepeat.EVERYDAY,
-                            "s",
-                            vibration.isChecked,
-                            false,
-                            remark.text.toString(),
-                            true
-                        )
-                    )
-                    Log.d(TAG, "onCreateView: ${alarmItemViewModel.getAllAlarm()}")
+                if (alarmItemViewModel.isAddAlarm.value!!) {
+                    addAlarm()
+                } else {
+                    updateAlarm()
                 }
-
-            }
-            repeat.setOnClickListener {
-                BottomSheetDialog(requireContext()).apply {
-                    setContentView(LineRadioGroup(
-                        requireContext(),
-                        listOf(
-                            "只响一次" to AlarmRepeat.ONE_TIME,
-                            "周一到周五" to AlarmRepeat.MONDAY2FRIDAY,
-                            "法定工作日" to AlarmRepeat.WORKING_DAY,
-                            "每天" to AlarmRepeat.EVERYDAY,
-                            "法定节假日" to AlarmRepeat.STATUTORY_HOLIDAYS,
-                            "大小周上班时间" to AlarmRepeat.REWARD
-                        )
-                    ).apply {
-                        setOnCheckedChangeListener { group, id ->
-                            dismiss()
-                        }
-                    })
-                    show()
+                requireActivity().runOnUiThread {
+                    navController.popBackStack()
                 }
             }
-            remark.setOnClickListener {
-                BottomSheetDialog(requireContext()).apply {
-                    setContentView(
-                        layoutInflater.inflate(
-                            R.layout.remark_add,
-                            it as ViewGroup,
-                            false
-                        )
-                    )
-                    show()
-                }
+            repeatWrapper.setOnClickListener {
+                showRepeatDialog()
             }
-            close.setOnClickListener {
-                navController.popBackStack()
+            remarkWrapper.setOnClickListener {
+                showRemarkDialog(it as ViewGroup)
             }
         }
-        return binding.root
     }
 
-    fun getPickerTime(): LocalTime {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observe()
+        bind()
+        binding.tools.setupWithNavController(
+            navController,
+            AppBarConfiguration(navController.graph)
+        )
+    }
+
+    private fun fixedCurrentAlarm(): Alarm {
+        val currentAlarm = alarmItemViewModel.currentAlarm.value!!
+        return currentAlarm.apply {
+            localTime = getPickerTime()
+            ring = "default"
+            vibration = binding.vibration.isChecked
+            autoDelete = false
+            remark = binding.remark.text.toString()
+        }
+    }
+
+    private fun addAlarm() {
+        GlobalScope.launch {
+            alarmItemViewModel.addAlarm(fixedCurrentAlarm())
+        }
+    }
+
+    private fun updateAlarm() {
+        GlobalScope.launch {
+            alarmItemViewModel.updateAlarm(fixedCurrentAlarm())
+        }
+    }
+
+    private fun showRepeatDialog() {
+        BottomSheetDialog(requireContext()).apply {
+            setContentView(LineRadioGroup(requireContext(), AlarmRepeat.NAME_TYPE_PAIRS).apply {
+                setOnCheckedChangeListener { group, id ->
+                    binding.repeat.text = AlarmRepeat.NAME_TYPE_PAIRS[id].first
+                    alarmItemViewModel.currentAlarm.value!!.repeat = id
+                    dismiss()
+                }
+            })
+            show()
+        }
+    }
+
+    private fun showRemarkDialog(parent: ViewGroup) {
+        val remarkAddBinding = RemarkAddBinding.inflate(layoutInflater, parent, false)
+        val remarkDialog = BottomSheetDialog(requireContext())
+        remarkAddBinding.apply {
+            confirm.setOnClickListener {
+                binding.remark.setText(remark.text)
+                remarkDialog.dismiss()
+            }
+            cancel.setOnClickListener {
+                remarkDialog.dismiss()
+            }
+        }
+        remarkDialog.apply {
+            setContentView(remarkAddBinding.root)
+            show()
+        }
+    }
+
+    private fun getPickerTime(): LocalTime {
         var pickerTime: LocalTime
         binding.apply {
             pickerTime = LocalTime.of(timePeriod.value * 12 + timeHour.value % 12, timeMinute.value)

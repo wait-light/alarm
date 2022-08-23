@@ -1,13 +1,19 @@
 package com.example.alarmapplication.ui
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextMenu
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alarmapplication.AlarmApplication
@@ -20,6 +26,8 @@ import com.example.alarmapplication.databinding.AlarmItemBinding
 import com.example.alarmapplication.databinding.FragmentAlarmListBinding
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.math.log
 
@@ -33,8 +41,6 @@ class AlarmListFragment : Fragment() {
     @Inject
     lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
     lateinit var adapter: Adapter
-    val data =
-        mutableListOf<Alarm>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
@@ -49,63 +55,124 @@ class AlarmListFragment : Fragment() {
 //        val alarmManager =
 //            context?.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
         binding = FragmentAlarmListBinding.inflate(inflater, container, false)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        bind()
+        observe()
+    }
+
+    private fun bind() {
         binding.apply {
             adapter = Adapter()
             alarmList.layoutManager = LinearLayoutManager(context)
             alarmList.adapter = adapter
-            addAlarm.setOnClickListener {
-                navController.navigate(AlarmListFragmentDirections.actionAlarmListFragmentToAlarmAddFragment())
+            action.setOnClickListener {
+                if (alarmListViewModel.multipleCheck.value!!) {
+                    GlobalScope.launch {
+                        alarmListViewModel.deletePickerAlarm()
+                    }
+                } else {
+                    navController.navigate(AlarmListFragmentDirections.actionAlarmListFragmentToAlarmAddFragment())
+                }
+            }
+            tools.setupWithNavController(
+                navController,
+                AppBarConfiguration(navController.graph)
+            )
+        }
+    }
+
+
+    private fun observe() {
+        alarmListViewModel.alarms.observe(viewLifecycleOwner) {
+            it?.apply {
+                adapter.notifyDataSetChanged()
             }
         }
-        return binding.root
+        alarmListViewModel.multipleCheck.observe(viewLifecycleOwner) {
+            if (it!!) {
+                binding.action.setImageResource(R.drawable.delete)
+            } else {
+                binding.action.setImageResource(R.drawable.add)
+            }
+            adapter.notifyDataSetChanged()
+        }
     }
 
     inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val binding = AlarmItemBinding.inflate(layoutInflater, parent, false)
+            binding.root.setOnLongClickListener {
+                alarmListViewModel.toggleMultipleCheck()
+                true
+            }
             return ViewHolder(binding)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val alarm = data[position]
+            val alarm = alarmListViewModel.alarms.value!!.get(position)
+            val checkList = alarmListViewModel.checkList
+            if (alarm.enable) {
+                holder.binding.nextTime.visibility = View.VISIBLE
+                holder.binding.nextTime.text =
+                    "${alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.nextTime(alarm)}后响铃" ?: ""
+            } else {
+                holder.binding.nextTime.visibility = View.GONE
+            }
             holder.itemView.setOnClickListener {
-                navController.navigate(
-                    AlarmListFragmentDirections.actionAlarmListFragmentToAlarmAddFragment(
-                        alarm
+                if (!alarmListViewModel.multipleCheck.value!!) {
+                    navController.navigate(
+                        AlarmListFragmentDirections.actionAlarmListFragmentToAlarmAddFragment(
+                            alarm
+                        )
                     )
-                )
+                } else {
+                    checkList[position] = !checkList[position]
+                    holder.binding.multiplyCheck.isChecked = checkList[position]
+                }
             }
             holder.binding.apply {
-                timePeriod.setText(if (alarm.localTime.hour < 12) "上午" else "下午")
-                time.setText(alarm.localTime.toString())
-                enable.isChecked = alarm.enable
-                enable.setOnClickListener {
-                    alarm.enable = enable.isChecked
-                    GlobalScope.launch {
-                        alarmListViewModel.updateAlarm(alarm)
+                timePeriod.text = if (alarm.localTime.hour < 12) "上午" else "下午"
+                time.text = alarm.localTime.toString()
+                if (alarmListViewModel.multipleCheck.value!!) {
+                    enable.visibility = View.GONE
+                    multiplyCheck.visibility = View.VISIBLE
+                    multiplyCheck.isChecked = checkList[position]
+                    multiplyCheck.setOnClickListener {
+                        checkList[position] = !checkList[position]
+                    }
+                    binding.tools.setNavigationIcon(R.drawable.close)
+                    binding.tools.setNavigationOnClickListener { alarmListViewModel.toggleMultipleCheck() }
+                } else {
+                    binding.tools.navigationIcon = null
+                    multiplyCheck.visibility = View.GONE
+                    enable.visibility = View.VISIBLE
+                    enable.isChecked = alarm.enable
+                    enable.setOnClickListener {
+                        alarm.enable = enable.isChecked
+                        GlobalScope.launch {
+                            alarmListViewModel.updateAlarm(alarm)
+                        }
                     }
                 }
             }
         }
 
-        override fun getItemCount(): Int = data.size
+        override fun getItemCount(): Int = alarmListViewModel.alarms.value?.size ?: 0
     }
 
     override fun onResume() {
         super.onResume()
         loadData()
-
     }
 
     private fun loadData() {
         GlobalScope.launch {
-            alarmListViewModel.getAllAlarm().collect() {
-                data.clear()
-                data.addAll(it)
-                requireActivity().runOnUiThread {
-                    adapter.notifyDataSetChanged()
-                }
-            }
+            alarmListViewModel.fetchAllAlarm()
         }
     }
 

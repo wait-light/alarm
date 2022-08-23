@@ -16,24 +16,24 @@ import com.example.alarmapplication.util.shotToast
 import com.example.alarmapplication.util.sp2px
 import kotlin.math.log
 
-class LineRadioGroup :
+class LineRadioGroup<T> :
     RadioGroup {
     constructor(
         context: Context,
         attributeSet: AttributeSet?,
-        buttons: List<Pair<String, Any>>
+        buttons: List<Pair<String, T>>
     ) : super(context, attributeSet) {
         init(buttons)
     }
 
-    constructor(context: Context, buttons: List<Pair<String, Any>>) : this(context, null, buttons)
+    constructor(context: Context, buttons: List<Pair<String, T>>) : this(context, null, buttons)
     constructor(context: Context, attributeSet: AttributeSet?) : this(
         context,
         attributeSet,
         listOf()
     )
 
-    fun init(buttons: List<Pair<String, Any>>) {
+    fun init(buttons: List<Pair<String, T>>) {
         val transparentColorDrawable = ColorDrawable(Color.TRANSPARENT)
         val textSize = 12f.sp2px(context)
         val buttonTopMargin = 5.dp2px(context).toInt()
@@ -46,6 +46,9 @@ class LineRadioGroup :
                 setButtonDrawable(transparentColorDrawable)
                 background = transparentColorDrawable
                 setTextSize(textSize)
+                if (button.second is Int) {
+                    id = button.second as Int
+                }
             }
             addView(radioButton)
             radioButton.apply {

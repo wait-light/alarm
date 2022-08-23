@@ -11,6 +11,7 @@ import javax.inject.Inject
 class AlarmItemViewModel : ViewModel {
     @Inject
     lateinit var alarmRepository: AlarmRepository
+    val isAddAlarm: LiveData<Boolean> = MutableLiveData(true)
     val currentAlarm: LiveData<Alarm> =
         MutableLiveData<Alarm>(
             Alarm(
@@ -32,7 +33,11 @@ class AlarmItemViewModel : ViewModel {
         (currentAlarm as MutableLiveData).value = alarm
     }
 
-    suspend fun addAlarm(alarm: Alarm) = alarmRepository.addAlarm(alarm)
-    fun getAllAlarm(): Flow<List<Alarm>> = alarmRepository.getAllAlarm()
+    suspend fun updateAlarm(alarm: Alarm) = alarmRepository.updateAlarm(alarm)
 
+    fun setNotAddAlarm() {
+        (isAddAlarm as MutableLiveData).value = false
+    }
+
+    suspend fun addAlarm(alarm: Alarm) = alarmRepository.addAlarm(alarm)
 }

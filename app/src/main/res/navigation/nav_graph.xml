@@ -8,25 +8,25 @@
     <fragment
         android:id="@+id/alarmListFragment"
         android:name="com.example.alarmapplication.ui.AlarmListFragment"
-        android:label="fragment_alarm_list"
-        tools:layout="@layout/fragment_alarm_list" >
+        android:label="闹钟"
+        tools:layout="@layout/fragment_alarm_list">
         <action
             android:id="@+id/action_alarmListFragment_to_alarmAddFragment"
             app:destination="@id/alarmAddFragment"
             app:enterAnim="@android:anim/slide_in_left"
             app:exitAnim="@android:anim/slide_out_right"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out" />
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left" />
     </fragment>
     <fragment
         android:id="@+id/alarmAddFragment"
         android:name="com.example.alarmapplication.ui.AlarmAddFragment"
-        android:label="fragment_alarm_add"
-        tools:layout="@layout/fragment_alarm_add" >
+        android:label="添加闹钟"
+        tools:layout="@layout/fragment_alarm_add">
         <argument
             android:name="alarm"
+            android:defaultValue="@null"
             app:argType="com.example.alarmapplication.data.Alarm"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
     </fragment>
 </navigation>
