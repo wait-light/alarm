@@ -9,21 +9,20 @@
         <entry key="..\:/Users/xindeng.deng/AndroidStudioProjects/AlarmApplication/app/src/main/res/layout/alarm_item.xml" value="0.25" />
         <entry key="..\:/Users/xindeng.deng/AndroidStudioProjects/AlarmApplication/app/src/main/res/layout/fragment_alarm_list.xml" value="0.175" />
         <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/drawable/close.xml" value="0.214" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/drawable/round_big.xml" value="0.1835" />
         <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/activity_main.xml" value="0.175" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/alarm_item.xml" value="0.5" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/fragment_alarm_add.xml" value="0.25" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/fragment_alarm_list.xml" value="0.2" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/remark_add.xml" value="0.175" />
-        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/menu/nav_drawer_menu.xml" value="0.175" />
+        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/alarm_item.xml" value="0.30480072463768115" />
+        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/fragment_alarm_add.xml" value="0.22" />
+        <entry key="..\:/Users/xindeng.deng/code/alarm/app/src/main/res/layout/fragment_alarm_list.xml" value="0.175" />
         <entry key="app/src/main/res/drawable/aaa.xml" value="0.1615" />
         <entry key="app/src/main/res/drawable/background.xml" value="0.1615" />
         <entry key="app/src/main/res/drawable/round_big.xml" value="0.19" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.17291666666666666" />
+        <entry key="app/src/main/res/layout/activity_main2.xml" value="0.1765625" />
         <entry key="app/src/main/res/layout/alarm_item.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_alarm_add.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_alarm_list.xml" value="0.29483695652173914" />
         <entry key="app/src/main/res/layout/remark_add.xml" value="0.321875" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.181" />
       </map>
     </option>
   </component>

@@ -1,13 +1,13 @@
 package com.example.alarmapplication.ui
 
 import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -15,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.example.alarmapplication.AlarmApplication
+import com.example.alarmapplication.MainActivity2
 import com.example.alarmapplication.R
 import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.FragmentAlarmAddBinding
@@ -52,13 +53,12 @@ class AlarmAddFragment : Fragment() {
         alarmService.set(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             5000L,
-            "asdf",
-            object : AlarmManager.OnAlarmListener {
-                override fun onAlarm() {
-                    Log.d(TAG, "onAlarm: xxxxxxxxxx")
-                }
-            },
-            null
+            PendingIntent.getBroadcast(
+                context,
+                1,
+                Intent(requireContext(), AlarmReceiver::class.java),
+                PendingIntent.FLAG_IMMUTABLE
+            )
         )
 
         super.onCreate(savedInstanceState)
