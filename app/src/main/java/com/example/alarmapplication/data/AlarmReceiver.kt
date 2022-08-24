@@ -13,6 +13,7 @@ import android.media.RingtoneManager
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import com.example.alarmapplication.MainActivity2
 import com.example.alarmapplication.R
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -33,22 +34,22 @@ class AlarmReceiver : BroadcastReceiver() {
 //                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //            })
 //        }
-        intent?.apply {
-            Log.d(TAG, "onReceive: xx")
-            when (intent.action) {
-                ACTION_START -> start(context!!)
-                ACTION_STOP -> stop(context!!)
-            }
-        }
-
-        Log.d(TAG, "onReceive: xxxxxx${this.hashCode()}")
+//        intent?.apply {
+//            Log.d(TAG, "onReceive: xx")
+//            when (intent.action) {
+//                ACTION_START -> start(context!!)
+//                ACTION_STOP -> stop(context!!)
+//            }
+//        }
+        context?.startService(Intent(context, AlarmService::class.java))
+        Log.e(TAG, "onReceive: xxxxxx${this.hashCode()}")
 
     }
 
     private fun start(context: Context) {
         context?.apply {
             notification(context)
-            playRing(context)
+//            playRing(context)
         }
     }
 
@@ -62,7 +63,9 @@ class AlarmReceiver : BroadcastReceiver() {
             notificationManager!!.createNotificationChannel(notificationChannel)
             notificationManager!!.notify(
                 NOTIFICATION_ID,
-                getChannelNotificationQ(context)
+                getChannelNotificationQ(context).apply {
+                    flags = flags or Notification.FLAG_NO_CLEAR
+                }
             )
         }
     }
@@ -94,9 +97,22 @@ class AlarmReceiver : BroadcastReceiver() {
         val notificationBuilder = NotificationCompat.Builder(context, ALARM_CHANNEL_ID)
             .setSmallIcon(R.drawable.alarm)
             .setSound(null)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(Notification.CATEGORY_ALARM)
+            .setAutoCancel(false)
+//            .setContentText("啦啦啦")
             .setContent(createRemoteViews(context))
+            .setFullScreenIntent(
+                PendingIntent.getActivity(
+                    context,
+                    1,
+                    Intent(context, MainActivity2::class.java).apply {
+                        setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                ), true
+            )
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         return notificationBuilder.build()
     }
 

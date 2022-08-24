@@ -1,13 +1,22 @@
 package com.example.alarmapplication.ui
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
+import android.provider.AlarmClock
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -15,17 +24,19 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.example.alarmapplication.AlarmApplication
-import com.example.alarmapplication.MainActivity2
 import com.example.alarmapplication.R
 import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.FragmentAlarmAddBinding
 import com.example.alarmapplication.databinding.RemarkAddBinding
 import com.example.alarmapplication.ui.component.LineRadioGroup
+import com.example.alarmapplication.util.shotToast
 import com.example.alarmapplication.util.sp2px
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.*
 import javax.inject.Inject
 
 class AlarmAddFragment : Fragment() {
@@ -49,20 +60,45 @@ class AlarmAddFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
+//        val registerForActivityResult =
+//            registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+//                Log.e(TAG, "onCreate: xxxxxxxxxxxxxxxxxxxxxxxxxxx$it")
+//                if (it) {
+//
+//                } else {
+//
+//                }
+//            }
+//        if (ContextCompat.checkSelfPermission(
+//                requireContext(),
+//                Manifest.permission.SCHEDULE_EXACT_ALARM
+//            ) == PackageManager.PERMISSION_DENIED
+//        ) {
+//            val uri = Uri.parse("package:" + context?.getPackageName());
+//            val i = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, uri);
+//            startActivity(i);
+////            registerForActivityResult.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
+//        } else {
+//            Log.e(TAG, "onCreate: ")
+//        }
+
         val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
-        alarmService.set(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            3000L,
-            PendingIntent.getService(
+//        alarmService.setAlarmClock(AlarmManager.AlarmClockInfo())
+        alarmService.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            Calendar.getInstance().apply {
+                timeInMillis += 1000 * 60 * 5
+            }.timeInMillis,
+            PendingIntent.getBroadcast(
                 context,
-                1,
-                Intent(requireContext(), AlarmService::class.java).apply {
-                    setAction(AlarmReceiver.ACTION_START)
-                },
-                PendingIntent.FLAG_IMMUTABLE
+                0,
+                Intent(
+                    requireContext(),
+                    AlarmReceiver::class.java
+                ).setAction(AlarmReceiver.ACTION_START),
+                PendingIntent.FLAG_ONE_SHOT
             )
         )
-
         super.onCreate(savedInstanceState)
         navController = findNavController()
     }

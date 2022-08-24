@@ -22,5 +22,4 @@ class AlarmModule {
     fun provideApplicationContext(): Context {
         return applicationContext
     }
-
 }
