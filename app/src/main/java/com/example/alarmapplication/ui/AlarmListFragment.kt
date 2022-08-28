@@ -1,5 +1,9 @@
 package com.example.alarmapplication.ui
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
@@ -18,10 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.R
-import com.example.alarmapplication.data.Alarm
-import com.example.alarmapplication.data.AlarmListViewModel
-import com.example.alarmapplication.data.AlarmRepeatStrategyFactory
-import com.example.alarmapplication.data.AlarmRepeatStrategyFactoryImpl
+import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.AlarmItemBinding
 import com.example.alarmapplication.databinding.FragmentAlarmListBinding
 import kotlinx.coroutines.GlobalScope
@@ -41,6 +42,16 @@ class AlarmListFragment : Fragment() {
     @Inject
     lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
     lateinit var adapter: Adapter
+
+    private val dataUpdateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    companion object {
+        const val DATA_UPDATE_KEY = "top.waitlight.alarm.data.update"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
@@ -84,6 +95,7 @@ class AlarmListFragment : Fragment() {
                 AppBarConfiguration(navController.graph)
             )
         }
+
     }
 
 
@@ -96,8 +108,11 @@ class AlarmListFragment : Fragment() {
         alarmListViewModel.multipleCheck.observe(viewLifecycleOwner) {
             if (it!!) {
                 binding.action.setImageResource(R.drawable.delete)
+                binding.tools.setNavigationIcon(R.drawable.close)
+                binding.tools.setNavigationOnClickListener { alarmListViewModel.toggleMultipleCheck() }
             } else {
                 binding.action.setImageResource(R.drawable.add)
+                binding.tools.navigationIcon = null
             }
             adapter.notifyDataSetChanged()
         }
@@ -119,7 +134,10 @@ class AlarmListFragment : Fragment() {
             if (alarm.enable) {
                 holder.binding.nextTime.visibility = View.VISIBLE
                 holder.binding.nextTime.text =
-                    "${alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.nextTime(alarm)}后响铃" ?: ""
+                    "${
+                        alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.nextTime(alarm)
+                            ?.userFriendlyTimeString()
+                    }后响铃" ?: ""
             } else {
                 holder.binding.nextTime.visibility = View.GONE
             }
@@ -137,7 +155,13 @@ class AlarmListFragment : Fragment() {
             }
             holder.binding.apply {
                 timePeriod.text = if (alarm.localTime.hour < 12) "上午" else "下午"
-                time.text = alarm.localTime.toString()
+                time.text = "${
+                    digitsFill(
+                        alarm.localTime.hour % 12,
+                        2
+                    )
+                }:${digitsFill(alarm.localTime.minute, 2)}"
+                cycle.text = AlarmRepeat.NAME_TYPE_PAIRS.get(alarm.repeat).first
                 if (alarmListViewModel.multipleCheck.value!!) {
                     enable.visibility = View.GONE
                     multiplyCheck.visibility = View.VISIBLE
@@ -145,10 +169,9 @@ class AlarmListFragment : Fragment() {
                     multiplyCheck.setOnClickListener {
                         checkList[position] = !checkList[position]
                     }
-                    binding.tools.setNavigationIcon(R.drawable.close)
-                    binding.tools.setNavigationOnClickListener { alarmListViewModel.toggleMultipleCheck() }
+
                 } else {
-                    binding.tools.navigationIcon = null
+//                    binding.tools.navigationIcon = null
                     multiplyCheck.visibility = View.GONE
                     enable.visibility = View.VISIBLE
                     enable.isChecked = alarm.enable
@@ -168,6 +191,12 @@ class AlarmListFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         loadData()
+        context?.registerReceiver(dataUpdateReceiver, IntentFilter(DATA_UPDATE_KEY))
+    }
+
+    override fun onStop() {
+        super.onStop()
+        context?.unregisterReceiver(dataUpdateReceiver)
     }
 
     private fun loadData() {

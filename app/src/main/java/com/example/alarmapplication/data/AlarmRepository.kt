@@ -14,7 +14,7 @@ import javax.inject.Singleton
 @Entity
 @TypeConverters(LocalTimeConvert::class)
 data class Alarm(
-    @PrimaryKey(autoGenerate = true) var id: Int,
+    @PrimaryKey(autoGenerate = true) var id: Long,
     var localTime: LocalTime,
     @AlarmRepeat var repeat: Int,
     var ring: String,
@@ -46,9 +46,12 @@ class AlarmRepository @Inject constructor() {
 
     fun getAllAlarm(): Flow<List<Alarm>> = dataSource.getAllAlarm()
 
-    suspend fun addAlarm(alarm: Alarm) = dataSource.addAlarm(alarm)
+    suspend fun addAlarm(alarm: Alarm): Long = dataSource.addAlarm(alarm)
 
     suspend fun removeAlarm(alarm: Alarm) = dataSource.removeAlarm(alarm)
 
     suspend fun updateAlarm(alarm: Alarm) = dataSource.updateAlarm(alarm)
+
+    fun getAlarm(id: Long): Alarm = dataSource.getAlarm(id)
+
 }

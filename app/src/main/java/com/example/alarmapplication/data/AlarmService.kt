@@ -9,8 +9,15 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.MainActivity2
 import com.example.alarmapplication.R
+import com.example.alarmapplication.domain.AlarmDomain
+import com.example.alarmapplication.ui.AlarmListFragment
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.math.log
 
 class AlarmService : Service() {
     companion object {
@@ -24,12 +31,19 @@ class AlarmService : Service() {
 
     private var notificationManager: NotificationManager? = null
     private var ringtone: Ringtone? = null
+    @Inject
+    lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
+    private var count = 0
+
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
     override fun onCreate() {
+        AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
         super.onCreate()
         start(baseContext)
     }
@@ -43,6 +57,17 @@ class AlarmService : Service() {
             }
         }
             ?: start(baseContext)
+        if (count++ == 0) {
+//            alarmRepeatStrategyFactory.getAlarmStrategy()
+            intent?.getLongExtra(AlarmReceiver.ALARM_ID_KEY, 0L)
+                ?.let {
+                    GlobalScope.launch {
+                        val alarm = alarmDomain.alarmRepository.getAlarm(it)
+                        alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.onAlarm(alarm)
+                        baseContext.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+                    }
+                }
+        }
         Log.e(TAG, "onStartCommand: xxxxx${this.hashCode()} ${this.notificationManager}")
         return result
 
@@ -52,6 +77,7 @@ class AlarmService : Service() {
         context?.apply {
             notification(context)
             playRing(context)
+
         }
     }
 

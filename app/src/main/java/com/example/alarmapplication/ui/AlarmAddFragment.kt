@@ -28,6 +28,7 @@ import com.example.alarmapplication.R
 import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.FragmentAlarmAddBinding
 import com.example.alarmapplication.databinding.RemarkAddBinding
+import com.example.alarmapplication.domain.AlarmDomain
 import com.example.alarmapplication.ui.component.LineRadioGroup
 import com.example.alarmapplication.util.shotToast
 import com.example.alarmapplication.util.sp2px
@@ -47,8 +48,10 @@ class AlarmAddFragment : Fragment() {
     lateinit var alarmItemViewModel: AlarmItemViewModel
     lateinit var navController: NavController
 
-    @Inject
-    lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
+//    @Inject
+//    lateinit var alarmDomain: AlarmDomain
+//    @Inject
+//    lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
 
     companion object {
         private const val TAG = "AlarmAddFragment"
@@ -82,23 +85,7 @@ class AlarmAddFragment : Fragment() {
 //            Log.e(TAG, "onCreate: ")
 //        }
 
-        val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
-//        alarmService.setAlarmClock(AlarmManager.AlarmClockInfo())
-        alarmService.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            Calendar.getInstance().apply {
-                timeInMillis += 1000 * 60 * 5
-            }.timeInMillis,
-            PendingIntent.getBroadcast(
-                context,
-                0,
-                Intent(
-                    requireContext(),
-                    AlarmReceiver::class.java
-                ).setAction(AlarmReceiver.ACTION_START),
-                PendingIntent.FLAG_ONE_SHOT
-            )
-        )
+
         super.onCreate(savedInstanceState)
         navController = findNavController()
     }
@@ -209,8 +196,32 @@ class AlarmAddFragment : Fragment() {
     }
 
     private fun addAlarm() {
+//        val alarmService = context?.getSystemService(AlarmManager::class.java) as AlarmManager
+//        alarmService.setExactAndAllowWhileIdle(
+//            AlarmManager.RTC_WAKEUP,
+//            Calendar.getInstance().apply {
+//                timeInMillis += 3000
+////                timeInMillis += 1000 * 60 * 5
+//            }.timeInMillis,
+//            PendingIntent.getBroadcast(
+//                context,
+//                12138,
+//                Intent(
+//                    requireContext(),
+//                    AlarmReceiver::class.java
+//                ).apply {
+//                    setAction(AlarmReceiver.ACTION_START)
+//                    putExtra("aaa",123)
+////                    putExtra("aaa", fixedCurrentAlarm())
+//                },
+//                PendingIntent.FLAG_ONE_SHOT
+//            )
+//        )
         GlobalScope.launch {
             alarmItemViewModel.addAlarm(fixedCurrentAlarm())
+//            val fixedCurrentAlarm = fixedCurrentAlarm()
+//
+//            Log.d(TAG, "addAlarm: ${ alarmItemViewModel.addAlarm(fixedCurrentAlarm)}")
         }
     }
 

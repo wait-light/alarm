@@ -24,6 +24,7 @@ class AlarmReceiver : BroadcastReceiver() {
         private const val TAG = "AlarmReceiver"
         const val ACTION_START = "notify"
         const val ACTION_STOP = "stop"
+        const val ALARM_ID_KEY = "alarm_id"
     }
 
     private var notificationManager: NotificationManager? = null
@@ -41,8 +42,10 @@ class AlarmReceiver : BroadcastReceiver() {
 //                ACTION_STOP -> stop(context!!)
 //            }
 //        }
-        context?.startService(Intent(context, AlarmService::class.java))
-        Log.e(TAG, "onReceive: xxxxxx${this.hashCode()}")
+        context?.startService(Intent(context, AlarmService::class.java).apply {
+            Log.e(TAG, "onReceive: ${intent?.getLongExtra(ALARM_ID_KEY, 0)}")
+            putExtra(ALARM_ID_KEY, intent?.getLongExtra(ALARM_ID_KEY, 0))
+        })
 
     }
 
