@@ -12,47 +12,12 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class AlarmDomain @Inject constructor() {
+class AlarmDataWithAlarmManager @Inject constructor() {
     @Inject
     lateinit var alarmRepository: AlarmRepository
 
     @Inject
     lateinit var applicationContext: Context
-
-    @Inject
-    lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
-
-    suspend fun addAlarm(alarm: Alarm): Long {
-        return alarmRepository.addAlarm(alarm).apply {
-            if (!alarm.enable) {
-                return this
-            }
-            alarm.id = this
-            val alarmStrategy = alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)
-            val alarmService =
-                applicationContext?.getSystemService(AlarmManager::class.java) as AlarmManager
-            alarmService.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                Calendar.getInstance().apply {
-                    timeInMillis += alarmStrategy!!.nextTime(alarm)
-                }.timeInMillis,
-                PendingIntent.getBroadcast(
-                    applicationContext,
-                    this.toInt(),
-                    Intent(
-                        applicationContext,
-                        AlarmReceiver::class.java
-                    ).apply {
-                        setAction(AlarmReceiver.ACTION_START)
-                        putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
-                    },
-                    PendingIntent.FLAG_ONE_SHOT
-                )
-            )
-        }
-    }
-
     suspend fun updateAlarm(alarm: Alarm) {
         if (alarm.id == 0L) {
             return
@@ -100,4 +65,54 @@ class AlarmDomain @Inject constructor() {
             )
         )
     }
+}
+
+@Singleton
+class AlarmDomain @Inject constructor() {
+    @Inject
+    lateinit var alarmRepository: AlarmRepository
+
+    @Inject
+    lateinit var alarmDataWithAlarmManager: AlarmDataWithAlarmManager
+
+    @Inject
+    lateinit var applicationContext: Context
+
+    @Inject
+    lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
+
+    suspend fun updateAlarm(alarm: Alarm) = alarmDataWithAlarmManager.updateAlarm(alarm)
+    suspend fun removeAlarm(alarm: Alarm) = alarmDataWithAlarmManager.removeAlarm(alarm)
+
+    suspend fun addAlarm(alarm: Alarm): Long {
+        return alarmRepository.addAlarm(alarm).apply {
+            if (!alarm.enable) {
+                return this
+            }
+            alarm.id = this
+            val alarmStrategy = alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)
+            val alarmService =
+                applicationContext?.getSystemService(AlarmManager::class.java) as AlarmManager
+            alarmService.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                Calendar.getInstance().apply {
+                    timeInMillis += alarmStrategy!!.nextTime(alarm)
+                }.timeInMillis,
+                PendingIntent.getBroadcast(
+                    applicationContext,
+                    this.toInt(),
+                    Intent(
+                        applicationContext,
+                        AlarmReceiver::class.java
+                    ).apply {
+                        setAction(AlarmReceiver.ACTION_START)
+                        putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
+                    },
+                    PendingIntent.FLAG_ONE_SHOT
+                )
+            )
+        }
+    }
+
+
 }

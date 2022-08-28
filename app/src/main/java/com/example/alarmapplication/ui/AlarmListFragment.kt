@@ -45,7 +45,7 @@ class AlarmListFragment : Fragment() {
 
     private val dataUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            adapter.notifyDataSetChanged()
+            loadData()
         }
     }
 
@@ -139,6 +139,7 @@ class AlarmListFragment : Fragment() {
                             ?.userFriendlyTimeString()
                     }后响铃" ?: ""
             } else {
+                holder.binding.enable.isChecked = false
                 holder.binding.nextTime.visibility = View.GONE
             }
             holder.itemView.setOnClickListener {

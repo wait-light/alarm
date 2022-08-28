@@ -2,6 +2,7 @@ package com.example.alarmapplication.data
 
 import android.util.Log
 import androidx.annotation.IntDef
+import com.example.alarmapplication.domain.AlarmDataWithAlarmManager
 import com.example.alarmapplication.domain.AlarmDomain
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -121,16 +122,16 @@ fun Int.length(): Int {
 
 class OneTimeAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     @Inject
-    lateinit var alarmDomain: AlarmDomain
+    lateinit var alarmDataWithAlarmManager: AlarmDataWithAlarmManager
     override fun onAlarm(alarm: Alarm) {
         if (alarm.autoDelete) {
             GlobalScope.launch {
-                alarmDomain.removeAlarm(alarm)
+                alarmDataWithAlarmManager.removeAlarm(alarm)
             }
         } else {
             alarm.enable = false
             GlobalScope.launch {
-                alarmDomain.updateAlarm(alarm)
+                alarmDataWithAlarmManager.updateAlarm(alarm)
             }
         }
     }
