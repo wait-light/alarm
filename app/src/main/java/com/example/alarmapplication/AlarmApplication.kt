@@ -2,6 +2,7 @@ package com.example.alarmapplication
 
 import android.app.Application
 import com.example.alarmapplication.data.AlarmRepeatStrategy
+import com.example.alarmapplication.data.AlarmRepeatStrategyFactory
 import com.example.alarmapplication.data.AlarmStrategyModule
 import com.example.alarmapplication.data.DataSourceModule
 import com.example.alarmapplication.ui.AlarmItemComponent
@@ -14,7 +15,8 @@ import javax.inject.Singleton
 @Component(modules = [AlarmModule::class, AlarmItemModule::class, DataSourceModule::class, AlarmStrategyModule::class])
 interface AlarmComponent {
     fun alarmItemComponent(): AlarmItemComponent.Factory
-    fun alarmRepeatStrategies(): Map<Int, AlarmRepeatStrategy>
+    //    fun alarmRepeatStrategies(): Map<Int, AlarmRepeatStrategy>
+    fun getAlarmRepeatAlarmRepeatStrategyFactory(): AlarmRepeatStrategyFactory
 }
 
 class AlarmApplication : Application() {

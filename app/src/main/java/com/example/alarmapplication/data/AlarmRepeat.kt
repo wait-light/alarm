@@ -1,15 +1,15 @@
 package com.example.alarmapplication.data
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.IntDef
-import com.example.alarmapplication.domain.AlarmDataWithAlarmManager
 import com.example.alarmapplication.domain.AlarmDomain
+import com.example.alarmapplication.ui.AlarmListFragment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
-import kotlin.math.log
 
 @IntDef(
     AlarmRepeat.ONE_TIME,
@@ -122,16 +122,22 @@ fun Int.length(): Int {
 
 class OneTimeAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
     @Inject
-    lateinit var alarmDataWithAlarmManager: AlarmDataWithAlarmManager
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
     override fun onAlarm(alarm: Alarm) {
         if (alarm.autoDelete) {
             GlobalScope.launch {
-                alarmDataWithAlarmManager.removeAlarm(alarm)
+                alarmDomain.removeAlarm(alarm)
+                context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+
             }
         } else {
             alarm.enable = false
             GlobalScope.launch {
-                alarmDataWithAlarmManager.updateAlarm(alarm)
+                alarmDomain.updateAlarm(alarm)
+                context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
             }
         }
     }
@@ -141,25 +147,9 @@ class OneTimeAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
         val deadline = alarm.localTime
         val nowMinuteSum = now.toMinuteSum()
         val deadlineSum = deadline.toMinuteSum()
-        return if (nowMinuteSum < deadlineSum)
+        return if (nowMinuteSum <= deadlineSum)
             (deadlineSum - nowMinuteSum) * 60000L
         else (ONE_DAY_MINUTE_SUM - (nowMinuteSum - deadlineSum)) * 60000L
-//        val result = StringBuilder()
-//        if (nowMinuteSum < deadlineSum) {
-//            val hour = (deadlineSum - nowMinuteSum) / 60
-//            if (hour > 0) {
-//                result.append("${digitsFill(hour, 2)}时")
-//            }
-//            result.append("${digitsFill((deadlineSum - nowMinuteSum) % 60, 2)}分钟")
-//        } else {
-//            val betweenMinute = (ONE_MINUTE_SUM - (nowMinuteSum - deadlineSum))
-//            val hour = betweenMinute / 60
-//            if (hour > 0) {
-//                result.append("${digitsFill(hour, 2)}时")
-//            }
-//            result.append("${digitsFill(betweenMinute % 60, 2)}分钟")
-//        }
-//        return result.toString()
     }
 }
 

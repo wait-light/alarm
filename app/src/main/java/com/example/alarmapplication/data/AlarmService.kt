@@ -64,7 +64,6 @@ class AlarmService : Service() {
                     GlobalScope.launch {
                         val alarm = alarmDomain.alarmRepository.getAlarm(it)
                         alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.onAlarm(alarm)
-                        baseContext.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
                     }
                 }
         }
