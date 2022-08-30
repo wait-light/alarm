@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.Ringtone
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.IBinder
 import android.util.Log
 import android.widget.RemoteViews
@@ -31,6 +32,7 @@ class AlarmService : Service() {
 
     private var notificationManager: NotificationManager? = null
     private var ringtone: Ringtone? = null
+
     @Inject
     lateinit var alarmRepeatStrategyFactory: AlarmRepeatStrategyFactory
     private var count = 0
@@ -45,18 +47,18 @@ class AlarmService : Service() {
     override fun onCreate() {
         AlarmApplication.ALARM_COMPONENT.alarmItemComponent().create().inject(this)
         super.onCreate()
-        start(baseContext)
+//        start(baseContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val result = super.onStartCommand(intent, flags, startId)
-        intent?.apply {
-            when (this.action) {
-                ACTION_STOP -> stop(baseContext)
-//                else -> start(applicationContext)
-            }
-        }
-            ?: start(baseContext)
+//        intent?.apply {
+//            when (this.action) {
+//                ACTION_STOP -> stop(baseContext)
+////                else -> start(applicationContext)
+//            }
+//        }
+//            ?: start(baseContext)
         if (count++ == 0) {
 //            alarmRepeatStrategyFactory.getAlarmStrategy()
             intent?.getLongExtra(AlarmReceiver.ALARM_ID_KEY, 0L)
@@ -64,19 +66,21 @@ class AlarmService : Service() {
                     GlobalScope.launch {
                         val alarm = alarmDomain.alarmRepository.getAlarm(it)
                         alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.onAlarm(alarm)
+                        start(baseContext, alarm)
                     }
                 }
+        } else {
+            stop(baseContext)
         }
         Log.e(TAG, "onStartCommand: xxxxx${this.hashCode()} ${this.notificationManager}")
         return result
 
     }
 
-    private fun start(context: Context) {
+    private fun start(context: Context, alarm: Alarm) {
         context?.apply {
             notification(context)
-            playRing(context)
-
+            playRing(context, alarm)
         }
     }
 
@@ -101,8 +105,10 @@ class AlarmService : Service() {
         }
     }
 
-    private fun playRing(context: Context) {
-        val ringUrl = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    private fun playRing(context: Context, alarm: Alarm) {
+        val ringUrl =
+            if (alarm.ring.isNullOrEmpty()) RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            else Uri.parse(alarm.ring)
         ringtone = RingtoneManager.getRingtone(context, ringUrl).apply { play() }
     }
 

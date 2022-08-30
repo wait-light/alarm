@@ -3,10 +3,14 @@ package com.example.alarmapplication.ui
 import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.os.SystemClock
 import android.provider.AlarmClock
 import android.provider.Settings
@@ -15,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.NumberPicker
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -23,11 +28,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.R
 import com.example.alarmapplication.data.*
 import com.example.alarmapplication.databinding.FragmentAlarmAddBinding
 import com.example.alarmapplication.databinding.RemarkAddBinding
+import com.example.alarmapplication.databinding.RingtoneItemBinding
+import com.example.alarmapplication.databinding.SingleRecycleviewBinding
 import com.example.alarmapplication.domain.AlarmDomain
 import com.example.alarmapplication.ui.component.LineRadioGroup
 import com.example.alarmapplication.util.shotToast
@@ -171,7 +180,75 @@ class AlarmAddFragment : Fragment() {
             remarkWrapper.setOnClickListener {
                 showRemarkDialog(it as ViewGroup)
             }
+            vibrationWrapper.setOnClickListener {
+                vibration.isChecked = !vibration.isChecked
+            }
+            ringWrapper.setOnClickListener {
+                showRingtoneDialog()
+            }
         }
+    }
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val text = itemView.findViewById<TextView>(R.id.text)
+    }
+
+    class RingtoneRecycleView(val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+        var data: List<Ringtone>? = null
+        var onClickListener: OnClickListener? = null
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            return ViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.ringtone_item, parent, false)
+            )
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            holder.text.text = data?.get(position)?.title
+            holder.text.setOnClickListener {
+                onClickListener?.onClick(it, position)
+            }
+        }
+
+        override fun getItemCount(): Int = data?.size ?: 0
+
+        interface OnClickListener {
+            fun onClick(view: View, position: Int)
+        }
+    }
+
+    private fun showRingtoneDialog() {
+        val dialog = BottomSheetDialog(requireContext())
+        dialog.setContentView(SingleRecycleviewBinding.inflate(layoutInflater).let {
+            it.content.apply {
+                val ringtoneRecycleView = RingtoneRecycleView(requireContext()).apply {
+                    var ringtone: android.media.Ringtone? = null
+                    onClickListener = object : RingtoneRecycleView.OnClickListener {
+                        override fun onClick(view: View, position: Int) {
+                            ringtone?.stop()
+                            ringtone =
+                                RingtoneManager.getRingtone(context, data?.get(position)?.url)
+                                    .apply { play() }
+                            dialog.setOnDismissListener {
+                                alarmItemViewModel.currentAlarm.value!!.ring =
+                                    data?.get(position)?.url.toString()
+                                binding.ring.setText(data?.get(position)?.title)
+                                ringtone?.stop()
+                            }
+                        }
+                    }
+                }
+                layoutManager = LinearLayoutManager(context)
+                adapter = ringtoneRecycleView
+                GlobalScope.launch {
+                    ringtoneRecycleView.data = getRingtoneList(context)
+                    post {
+                        adapter!!.notifyDataSetChanged()
+                    }
+                }
+            }
+            it.root
+        })
+        dialog.show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
