@@ -109,6 +109,7 @@ class AlarmAddFragment : Fragment() {
                     vibration.isChecked = it.vibration
                     remark.text = it.remark
                     repeat.text = AlarmRepeat.NAME_TYPE_PAIRS[it.repeat].first
+                    ring.text = if(it.ring.isNullOrEmpty()) "" else Uri.parse(it.ring).getQueryParameter("title")
                 }
             }
         }
@@ -265,7 +266,6 @@ class AlarmAddFragment : Fragment() {
         val currentAlarm = alarmItemViewModel.currentAlarm.value!!
         return currentAlarm.apply {
             localTime = getPickerTime()
-            ring = "default"
             vibration = binding.vibration.isChecked
             autoDelete = false
             remark = binding.remark.text.toString()

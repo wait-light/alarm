@@ -21,7 +21,7 @@ class LocalAlarmDatasource : AlarmDataSource {
     override fun getAllAlarm(): Flow<List<Alarm>> = dataBase.alarmDao().getAll()
     override fun getAlarm(id: Long): Alarm = dataBase.alarmDao().getAlarm(id)
 
-    override suspend fun addAlarm(alarm: Alarm): Long = dataBase.alarmDao().insertAll(alarm)
+    override suspend fun addAlarm(alarm: Alarm): Long = dataBase.alarmDao().insert(alarm)
 
     override suspend fun removeAlarm(alarm: Alarm) = dataBase.alarmDao().delete(alarm)
 
@@ -37,7 +37,7 @@ interface AlarmDao {
     fun getAlarm(id: Long): Alarm
 
     @Insert
-    suspend fun insertAll(alarm: Alarm): Long
+    suspend fun insert(alarm: Alarm): Long
 
     @Delete
     suspend fun delete(alarm: Alarm)

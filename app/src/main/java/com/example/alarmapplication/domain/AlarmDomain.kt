@@ -4,10 +4,10 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.data.Alarm
 import com.example.alarmapplication.data.AlarmReceiver
-import com.example.alarmapplication.data.AlarmRepeatStrategyFactory
 import com.example.alarmapplication.data.AlarmRepository
 import java.util.*
 import javax.inject.Inject
@@ -27,12 +27,11 @@ class AlarmDomain @Inject constructor() {
 
 
     suspend fun addAlarm(alarm: Alarm): Long {
-        return alarmRepository.addAlarm(alarm).apply {
-            if (!alarm.enable) {
-                return this
-            }
-            startAlarm(alarm)
+        val alarmId = alarmRepository.addAlarm(alarm)
+        if (alarm.enable) {
+            startAlarm(alarm.apply { id = alarmId })
         }
+        return alarmId
     }
 
     private fun startAlarm(alarm: Alarm) {
@@ -55,6 +54,7 @@ class AlarmDomain @Inject constructor() {
                 ).apply {
                     setAction(AlarmReceiver.ACTION_START)
                     putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
+                    Log.e("TAG", "startAlarm: ${alarm.id}")
                 },
                 PendingIntent.FLAG_ONE_SHOT
             )
