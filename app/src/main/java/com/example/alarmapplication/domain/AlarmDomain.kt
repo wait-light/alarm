@@ -9,6 +9,9 @@ import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.data.Alarm
 import com.example.alarmapplication.data.AlarmReceiver
 import com.example.alarmapplication.data.AlarmRepository
+import com.example.alarmapplication.data.AlarmService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,31 +37,34 @@ class AlarmDomain @Inject constructor() {
         return alarmId
     }
 
-    private fun startAlarm(alarm: Alarm) {
+    fun startAlarm(alarm: Alarm) {
         val alarmStrategy =
             AlarmApplication.ALARM_COMPONENT.getAlarmRepeatAlarmRepeatStrategyFactory()
                 .getAlarmStrategy(alarm.repeat)
         val alarmService =
             applicationContext?.getSystemService(AlarmManager::class.java) as AlarmManager
-        alarmService.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            Calendar.getInstance().apply {
-                timeInMillis += alarmStrategy!!.nextTime(alarm)
-            }.timeInMillis,
-            PendingIntent.getBroadcast(
-                applicationContext,
-                alarm.id.toInt(),
-                Intent(
+        GlobalScope.launch {
+            alarmService.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                Calendar.getInstance().apply {
+                    timeInMillis += alarmStrategy!!.nextTime(alarm)
+                }.timeInMillis,
+                PendingIntent.getBroadcast(
                     applicationContext,
-                    AlarmReceiver::class.java
-                ).apply {
-                    setAction(AlarmReceiver.ACTION_START)
-                    putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
-                    Log.e("TAG", "startAlarm: ${alarm.id}")
-                },
-                PendingIntent.FLAG_ONE_SHOT
+                    alarm.id.toInt(),
+                    Intent(
+                        applicationContext,
+                        AlarmReceiver::class.java
+                    ).apply {
+                        setAction(AlarmService.ACTION_START)
+                        putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
+                        Log.e("TAG", "startAlarm: ${alarm.id}")
+                    },
+                    PendingIntent.FLAG_ONE_SHOT
+                )
             )
-        )
+        }
+
     }
 
     private fun cancelAlarm(alarmId: Long) {
@@ -72,7 +78,7 @@ class AlarmDomain @Inject constructor() {
                     applicationContext,
                     AlarmReceiver::class.java
                 ).apply {
-                    setAction(AlarmReceiver.ACTION_START)
+                    setAction(AlarmService.ACTION_START)
                     putExtra(AlarmReceiver.ALARM_ID_KEY, alarmId)
                 },
                 PendingIntent.FLAG_ONE_SHOT
@@ -92,7 +98,9 @@ class AlarmDomain @Inject constructor() {
         }
         //开启闹钟
         if (alarm.enable && alarm.enable != oldValue.enable) {
-            startAlarm(alarm)
+            GlobalScope.launch {
+                startAlarm(alarm)
+            }
         }
 
     }
@@ -112,7 +120,7 @@ class AlarmDomain @Inject constructor() {
                     applicationContext,
                     AlarmReceiver::class.java
                 ).apply {
-                    setAction(AlarmReceiver.ACTION_START)
+                    setAction(AlarmService.ACTION_START)
                     putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
                 },
                 PendingIntent.FLAG_ONE_SHOT

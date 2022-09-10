@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import com.example.alarmapplication.data.alarm.AlarmDataSource
 import kotlinx.coroutines.flow.Flow
 import java.io.Serializable
 import java.time.LocalTime
@@ -38,9 +39,6 @@ class LocalTimeConvert {
 
 @Singleton
 class AlarmRepository @Inject constructor() {
-    @Inject
-    lateinit var applicationContext: Context
-
     @Inject
     lateinit var dataSource: AlarmDataSource
 

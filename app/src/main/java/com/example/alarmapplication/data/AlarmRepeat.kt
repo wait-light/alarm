@@ -2,13 +2,19 @@ package com.example.alarmapplication.data
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.annotation.IntDef
+import com.example.alarmapplication.data.holiday.HolidayRepository
+import com.example.alarmapplication.data.holiday.HolidayStatus
 import com.example.alarmapplication.domain.AlarmDomain
 import com.example.alarmapplication.ui.AlarmListFragment
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 @IntDef(
@@ -53,7 +59,7 @@ annotation class AlarmRepeat {
 
 interface AlarmRepeatStrategy {
     fun onAlarm(alarm: Alarm)
-    fun nextTime(alarm: Alarm): Long
+    suspend fun nextTime(alarm: Alarm): Long
 }
 
 interface AlarmRepeatStrategyFactory {
@@ -82,10 +88,19 @@ fun LocalTime.toMinuteSum(): Int {
     return hour * 60 + minute
 }
 
+fun LocalTime.toEpochMilli(): Long {
+    return this.atDate(LocalDate.now()).toEpochMilli()
+}
+
+fun LocalDateTime.toEpochMilli(): Long {
+    return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}
+
 fun digitsFill(number: Int, bit: Int): String {
     val between = bit - number.length()
     return "${"0".repeat(if (between > 0) between else 0)}${number}"
 }
+
 
 fun Long.userFriendlyTimeString(): String {
     val result = StringBuilder()
@@ -131,7 +146,6 @@ class OneTimeAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
             GlobalScope.launch {
                 alarmDomain.removeAlarm(alarm)
                 context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
-
             }
         } else {
             alarm.enable = false
@@ -142,63 +156,174 @@ class OneTimeAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
         }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
+    override suspend fun nextTime(alarm: Alarm): Long {
         val now = LocalDateTime.now()
         val deadline = alarm.localTime
-        val nowMinuteSum = now.toMinuteSum()
-        val deadlineSum = deadline.toMinuteSum()
-        return if (nowMinuteSum <= deadlineSum)
-            (deadlineSum - nowMinuteSum) * 60000L
-        else (ONE_DAY_MINUTE_SUM - (nowMinuteSum - deadlineSum)) * 60000L
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        return if (nowEpochMilli <= deadlineEpochMilli)
+            deadlineEpochMilli - nowEpochMilli
+        else (ONE_DAY_MILLISECOND - (nowEpochMilli - deadlineEpochMilli))
     }
 }
 
 class Monday2FridayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
     override fun onAlarm(alarm: Alarm) {
-        TODO("Not yet implemented")
+        GlobalScope.launch {
+            context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+            alarmDomain.startAlarm(alarm)
+        }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
-        TODO("Not yet implemented")
+    override suspend fun nextTime(alarm: Alarm): Long {
+        val now = LocalDateTime.now()
+        val deadline = alarm.localTime
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        val nowWeek = now.dayOfWeek.value
+        return if (nowEpochMilli <= deadlineEpochMilli && nowWeek <= 5)
+            (deadlineEpochMilli - nowEpochMilli)
+        else (ONE_DAY_MILLISECOND * (if (nowWeek <= 4) 1 else 8 - nowWeek) - (nowEpochMilli - deadlineEpochMilli))
     }
 }
 
 class WorkingDayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
+
+    @Inject
+    lateinit var holidyRepository: HolidayRepository
     override fun onAlarm(alarm: Alarm) {
-        TODO("Not yet implemented")
+        GlobalScope.launch {
+            context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+            alarmDomain.startAlarm(alarm)
+        }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
-        TODO("Not yet implemented")
+    override suspend fun nextTime(alarm: Alarm): Long {
+        val now = LocalDateTime.now()
+        val deadline = alarm.localTime
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        return Math.abs(
+            holidyRepository.getTargetDayNextTargetWorkDay(
+                "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                nowEpochMilli < deadlineEpochMilli
+            ).toLocalDateTime().withHour(alarm.localTime.hour)
+                .withMinute(alarm.localTime.minute).toEpochMilli() - nowEpochMilli
+        )
     }
 }
 
 class EverydayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
     override fun onAlarm(alarm: Alarm) {
-        TODO("Not yet implemented")
+        GlobalScope.launch {
+            context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+            alarmDomain.startAlarm(alarm)
+        }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
-        TODO("Not yet implemented")
+    override suspend fun nextTime(alarm: Alarm): Long {
+        val now = LocalDateTime.now()
+        val deadline = alarm.localTime
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        return if (nowEpochMilli < deadlineEpochMilli)
+            deadlineEpochMilli - nowEpochMilli
+        else (ONE_DAY_MILLISECOND - (nowEpochMilli - deadlineEpochMilli))
     }
 }
 
 class StatutoryHolidaysAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
+
+    @Inject
+    lateinit var holidyRepository: HolidayRepository
     override fun onAlarm(alarm: Alarm) {
-        TODO("Not yet implemented")
+        GlobalScope.launch {
+            context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+            alarmDomain.startAlarm(alarm)
+        }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
-        TODO("Not yet implemented")
+    override suspend fun nextTime(alarm: Alarm): Long {
+        val now = LocalDateTime.now()
+        val deadline = alarm.localTime
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        var result = 0L
+        runBlocking {
+            result = Math.abs(
+                holidyRepository.getTargetDayNextHolidayOrWeekend(
+                    "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                    nowEpochMilli < deadlineEpochMilli
+                ).toLocalDateTime().withHour(alarm.localTime.hour)
+                    .withMinute(alarm.localTime.minute).toEpochMilli() - nowEpochMilli
+            )
+        }
+        return result
     }
 }
 
 class RewardAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
+    @Inject
+    lateinit var alarmDomain: AlarmDomain
+
+    @Inject
+    lateinit var context: Context
+
+    @Inject
+    lateinit var holidyRepository: HolidayRepository
     override fun onAlarm(alarm: Alarm) {
-        TODO("Not yet implemented")
+        GlobalScope.launch {
+            context.sendBroadcast(Intent(AlarmListFragment.DATA_UPDATE_KEY))
+            alarmDomain.startAlarm(alarm)
+        }
     }
 
-    override fun nextTime(alarm: Alarm): Long {
-        TODO("Not yet implemented")
+    override suspend fun nextTime(alarm: Alarm): Long {
+        val now = LocalDateTime.now()
+        val deadline = alarm.localTime
+        val nowEpochMilli = now.toEpochMilli()
+        val deadlineEpochMilli = deadline.toEpochMilli()
+        var result = 0L
+        runBlocking {
+            result = Math.abs(
+                holidyRepository.getTargetDayNextTargetStatusDay(
+                    "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                    nowEpochMilli < deadlineEpochMilli,
+                    //大小周工作日判断
+                    {
+                        (this.status == HolidayStatus.STATUS_WORK_DAY || (isRewardWeek(
+                            toLocalDateTime()
+                        ) && toLocalDateTime().dayOfWeek.value == 6 && this.status == HolidayStatus.STATUS_WEEKEND)
+                                || this.status == HolidayStatus.STATUS_SABBATICAL)
+                    },
+                ).toLocalDateTime().withHour(alarm.localTime.hour)
+                    .withMinute(alarm.localTime.minute).toEpochMilli() - nowEpochMilli
+            )
+        }
+        return result
+    }
+
+    private fun isRewardWeek(date: LocalDateTime): Boolean {
+        return (((date.dayOfYear + 5) / 7) % 2) == 1
     }
 }

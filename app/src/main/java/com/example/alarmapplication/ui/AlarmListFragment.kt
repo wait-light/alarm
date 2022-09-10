@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -125,11 +126,17 @@ class AlarmListFragment : Fragment() {
             val checkList = alarmListViewModel.checkList
             if (alarm.enable) {
                 holder.binding.nextTime.visibility = View.VISIBLE
-                holder.binding.nextTime.text =
-                    "${
+                GlobalScope.launch {
+                    val string = "${
                         alarmRepeatStrategyFactory.getAlarmStrategy(alarm.repeat)?.nextTime(alarm)
                             ?.userFriendlyTimeString()
                     }后响铃" ?: ""
+                    Log.d("TAG", "${Thread.currentThread().name}: ")
+                    holder.binding.nextTime.post {
+                        Log.d("TAG", "${Thread.currentThread().name}: ")
+                        holder.binding.nextTime.text = string
+                    }
+                }
             } else {
                 holder.binding.enable.isChecked = false
                 holder.binding.nextTime.visibility = View.GONE

@@ -2,11 +2,14 @@ package com.example.alarmapplication.data
 
 import android.content.Context
 import androidx.room.*
+import com.example.alarmapplication.data.alarm.AlarmDataSource
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LocalAlarmDatasource : AlarmDataSource {
 
     private var applicationContext: Context
@@ -47,6 +50,7 @@ interface AlarmDao {
 }
 
 @Database(entities = [Alarm::class], version = 1, exportSchema = false)
+@Singleton
 abstract class AlarmDataBase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "alarm-db"
