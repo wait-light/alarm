@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">AlarmApplication</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <array name="time_period">
         <item>上午</item>
         <item>下午</item>
