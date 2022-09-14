@@ -1,7 +1,28 @@
 <resources>
-    <string name="app_name">AlarmApplication</string>
+    <string name="app_name">Alarm</string>
+    <string name="hour">hour</string>
+    <string name="minute">minute</string>
+    <string name="second">second</string>
+    <string name="ring">ring</string>
+    <string name="repeat">repeat</string>
+    <string name="vibration">vibration</string>
+    <string name="remark">remark</string>
+    <string name="update">update</string>
+    <string name="add">add</string>
+
+    <string name="nav_add_alarm">Add Alarm</string>
+    <string name="nav_homepage">Alarm</string>
+
+    <string name="repeat_type_one_time">One Time</string>
+    <string name="repeat_type_monday2friday">Monday to Friday</string>
+    <string name="repeat_type_working_day">Working Day</string>
+    <string name="repeat_type_everyday">Everyday</string>
+    <string name="repeat_type_statutory_holidays">Statutory Holidays</string>
+    <string name="repeat_type_reward">Reward</string>
+
+
     <array name="time_period">
-        <item>上午</item>
-        <item>下午</item>
+        <item>morning</item>
+        <item>afternoon</item>
     </array>
 </resources>

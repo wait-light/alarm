@@ -121,6 +121,8 @@ class AlarmListFragment : Fragment() {
             return ViewHolder(binding)
         }
 
+        private val timePeriodString = context?.resources?.getStringArray(R.array.time_period)
+
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val alarm = alarmListViewModel.alarms.value!!.get(position)
             val checkList = alarmListViewModel.checkList
@@ -154,14 +156,17 @@ class AlarmListFragment : Fragment() {
                 }
             }
             holder.binding.apply {
-                timePeriod.text = if (alarm.localTime.hour < 12) "上午" else "下午"
+                timePeriod.text =
+                    if (alarm.localTime.hour < 12) timePeriodString?.get(0) else timePeriodString?.get(
+                        1
+                    )
                 time.text = "${
                     digitsFill(
                         alarm.localTime.hour % 12,
                         2
                     )
                 }:${digitsFill(alarm.localTime.minute, 2)}"
-                cycle.text = AlarmRepeat.NAME_TYPE_PAIRS.get(alarm.repeat).first
+                cycle.text = AlarmRepeat.getNameTypePairs(requireContext()).get(alarm.repeat).first
                 if (alarmListViewModel.multipleCheck.value!!) {
                     enable.visibility = View.GONE
                     multiplyCheck.visibility = View.VISIBLE

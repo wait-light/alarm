@@ -108,16 +108,17 @@ class AlarmAddFragment : Fragment() {
                     timeMinute.value = localTime.minute
                     vibration.isChecked = it.vibration
                     remark.text = it.remark
-                    repeat.text = AlarmRepeat.NAME_TYPE_PAIRS[it.repeat].first
-                    ring.text = if(it.ring.isNullOrEmpty()) "" else Uri.parse(it.ring).getQueryParameter("title")
+                    repeat.text = AlarmRepeat.getNameTypePairs(requireContext())[it.repeat].first
+                    ring.text = if (it.ring.isNullOrEmpty()) "" else Uri.parse(it.ring)
+                        .getQueryParameter("title")
                 }
             }
         }
         alarmItemViewModel.isAddAlarm.observe(viewLifecycleOwner) {
             if (it!!) {
-                binding.check.setText("添加")
+                binding.check.setText(requireContext().resources.getString(R.string.add))
             } else {
-                binding.check.setText("更新")
+                binding.check.setText(requireContext().resources.getString(R.string.update))
             }
         }
     }
@@ -310,9 +311,9 @@ class AlarmAddFragment : Fragment() {
 
     private fun showRepeatDialog() {
         BottomSheetDialog(requireContext()).apply {
-            setContentView(LineRadioGroup(requireContext(), AlarmRepeat.NAME_TYPE_PAIRS).apply {
+            setContentView(LineRadioGroup(requireContext(), AlarmRepeat.getNameTypePairs(requireContext())).apply {
                 setOnCheckedChangeListener { group, id ->
-                    binding.repeat.text = AlarmRepeat.NAME_TYPE_PAIRS[id].first
+                    binding.repeat.text = AlarmRepeat.getNameTypePairs(requireContext())[id].first
                     alarmItemViewModel.currentAlarm.value!!.repeat = id
                     dismiss()
                 }

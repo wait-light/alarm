@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.annotation.IntDef
+import com.example.alarmapplication.R
 import com.example.alarmapplication.data.holiday.HolidayRepository
 import com.example.alarmapplication.data.holiday.HolidayStatus
 import com.example.alarmapplication.domain.AlarmDomain
@@ -45,7 +46,6 @@ annotation class AlarmRepeat {
 
         //大小周
         const val REWARD = 5
-
         val NAME_TYPE_PAIRS = listOf(
             "只响一次" to ONE_TIME,
             "周一到周五" to MONDAY2FRIDAY,
@@ -54,6 +54,17 @@ annotation class AlarmRepeat {
             "法定节假日" to STATUTORY_HOLIDAYS,
             "大小周上班时间" to REWARD
         )
+
+        fun getNameTypePairs(context: Context): List<Pair<String, Int>> {
+            return listOf(
+                context.resources.getString(R.string.repeat_type_one_time) to ONE_TIME,
+                context.resources.getString(R.string.repeat_type_monday2friday) to MONDAY2FRIDAY,
+                context.resources.getString(R.string.repeat_type_working_day) to WORKING_DAY,
+                context.resources.getString(R.string.repeat_type_everyday) to EVERYDAY,
+                context.resources.getString(R.string.repeat_type_statutory_holidays) to STATUTORY_HOLIDAYS,
+                context.resources.getString(R.string.repeat_type_reward) to REWARD,
+            )
+        }
     }
 }
 
@@ -215,7 +226,12 @@ class WorkingDayAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy 
         val deadlineEpochMilli = deadline.toEpochMilli()
         return Math.abs(
             holidyRepository.getTargetDayNextTargetWorkDay(
-                "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                "${digitsFill(now.year, 4)}-${
+                    digitsFill(
+                        now.monthValue,
+                        2
+                    )
+                }-${digitsFill(now.dayOfMonth, 2)}",
                 nowEpochMilli < deadlineEpochMilli
             ).toLocalDateTime().withHour(alarm.localTime.hour)
                 .withMinute(alarm.localTime.minute).toEpochMilli() - nowEpochMilli
@@ -272,7 +288,12 @@ class StatutoryHolidaysAlarmRepeatStrategy @Inject constructor() : AlarmRepeatSt
         runBlocking {
             result = Math.abs(
                 holidyRepository.getTargetDayNextHolidayOrWeekend(
-                    "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                    "${digitsFill(now.year, 4)}-${
+                        digitsFill(
+                            now.monthValue,
+                            2
+                        )
+                    }-${digitsFill(now.dayOfMonth, 2)}",
                     nowEpochMilli < deadlineEpochMilli
                 ).toLocalDateTime().withHour(alarm.localTime.hour)
                     .withMinute(alarm.localTime.minute).toEpochMilli() - nowEpochMilli
@@ -307,7 +328,12 @@ class RewardAlarmRepeatStrategy @Inject constructor() : AlarmRepeatStrategy {
         runBlocking {
             result = Math.abs(
                 holidyRepository.getTargetDayNextTargetStatusDay(
-                    "${digitsFill(now.year,4)}-${digitsFill(now.monthValue,2)}-${digitsFill(now.dayOfMonth,2)}",
+                    "${digitsFill(now.year, 4)}-${
+                        digitsFill(
+                            now.monthValue,
+                            2
+                        )
+                    }-${digitsFill(now.dayOfMonth, 2)}",
                     nowEpochMilli < deadlineEpochMilli,
                     //大小周工作日判断
                     {

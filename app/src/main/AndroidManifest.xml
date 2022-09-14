@@ -22,10 +22,7 @@
         <receiver android:name=".data.AlarmReceiver">
 
         </receiver>
-        <service android:name=".data.AlarmService" android:process=":alarmService"></service>
-        <activity
-            android:name=".MainActivity2"
-            android:exported="false" />
+        <service android:name=".data.AlarmService" android:process=":alarmService" android:directBootAware="true"></service>
         <activity
             android:name=".MainActivity"
             android:exported="true" >

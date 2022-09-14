@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/alarmListFragment"
         android:name="com.example.alarmapplication.ui.AlarmListFragment"
-        android:label="闹钟"
+        android:label="@string/nav_homepage"
         tools:layout="@layout/fragment_alarm_list">
         <action
             android:id="@+id/action_alarmListFragment_to_alarmAddFragment"
@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/alarmAddFragment"
         android:name="com.example.alarmapplication.ui.AlarmAddFragment"
-        android:label="添加闹钟"
+        android:label="@string/nav_add_alarm"
         tools:layout="@layout/fragment_alarm_add">
         <argument
             android:name="alarm"
