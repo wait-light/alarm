@@ -3,8 +3,8 @@ package com.example.alarmapplication.data
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.media.*
 import android.media.Ringtone
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.IBinder
 import android.util.Log
@@ -106,7 +106,13 @@ class AlarmService : Service() {
             if (alarm.ring.isNullOrEmpty()) RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
             else Uri.parse(alarm.ring)
         Log.e(TAG, "playRing: ${ringUrl}  alarm ${alarm}")
-        ringtone = RingtoneManager.getRingtone(context, ringUrl).apply { play() }
+        ringtone = RingtoneManager.getRingtone(context, ringUrl).apply {
+            audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            play()
+        }
     }
 
     private fun stopNotification(context: Context) {
