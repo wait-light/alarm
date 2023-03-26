@@ -19,6 +19,7 @@
     <string name="repeat_type_everyday">Everyday</string>
     <string name="repeat_type_statutory_holidays">Statutory Holidays</string>
     <string name="repeat_type_reward">Reward</string>
+    <string name="empty_data">数据为空</string>
 
 
     <array name="time_period">

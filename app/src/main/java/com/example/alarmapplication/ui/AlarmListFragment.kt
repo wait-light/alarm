@@ -154,6 +154,9 @@ class AlarmListFragment : Fragment() {
                     checkList[position] = !checkList[position]
                     holder.binding.multiplyCheck.isChecked = checkList[position]
                 }
+                Log.d("TAGxxxx", "onBindViewHolder: " + checkList)
+                Log.d("TAGxxxx", "onBindViewHolder: $position ${holder.binding.multiplyCheck.isChecked}")
+
             }
             holder.binding.apply {
                 timePeriod.text =
@@ -174,6 +177,8 @@ class AlarmListFragment : Fragment() {
                     multiplyCheck.setOnClickListener {
                         checkList[position] = !checkList[position]
                     }
+                    Log.d("TAGxx", "onBindViewHolder: " + checkList)
+                    Log.d("TAGxx", "onBindViewHolder: $position ${holder.binding.multiplyCheck.isChecked}")
 
                 } else {
 //                    binding.tools.navigationIcon = null

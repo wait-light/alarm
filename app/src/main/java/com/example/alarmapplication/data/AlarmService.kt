@@ -6,6 +6,7 @@ import android.content.Intent
 import android.media.*
 import android.media.Ringtone
 import android.net.Uri
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.widget.RemoteViews
@@ -157,7 +158,7 @@ class AlarmService : Service() {
                     context,
                     STOP_REQUEST_CODE,
                     Intent(context, AlarmService::class.java).setAction(ACTION_STOP),
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT or if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
                 )
             )
             setTextViewText(R.id.remark, alarm.remark)

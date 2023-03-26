@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import com.example.alarmapplication.AlarmApplication
 import com.example.alarmapplication.data.Alarm
@@ -60,7 +61,7 @@ class AlarmDomain @Inject constructor() {
                         putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
                         Log.e("TAG", "startAlarm: ${alarm.id}")
                     },
-                    PendingIntent.FLAG_ONE_SHOT
+                    PendingIntent.FLAG_ONE_SHOT or if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
                 )
             )
         }
@@ -81,7 +82,8 @@ class AlarmDomain @Inject constructor() {
                     setAction(AlarmService.ACTION_START)
                     putExtra(AlarmReceiver.ALARM_ID_KEY, alarmId)
                 },
-                PendingIntent.FLAG_ONE_SHOT
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_ONE_SHOT or if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
+
             )
         )
     }
@@ -123,7 +125,7 @@ class AlarmDomain @Inject constructor() {
                     setAction(AlarmService.ACTION_START)
                     putExtra(AlarmReceiver.ALARM_ID_KEY, alarm.id)
                 },
-                PendingIntent.FLAG_ONE_SHOT
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_ONE_SHOT or if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE else 0
             )
         )
     }

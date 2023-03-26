@@ -94,7 +94,6 @@ class AlarmAddFragment : Fragment() {
 //            Log.e(TAG, "onCreate: ")
 //        }
 
-
         super.onCreate(savedInstanceState)
         navController = findNavController()
     }
@@ -311,13 +310,18 @@ class AlarmAddFragment : Fragment() {
 
     private fun showRepeatDialog() {
         BottomSheetDialog(requireContext()).apply {
-            setContentView(LineRadioGroup(requireContext(), AlarmRepeat.getNameTypePairs(requireContext())).apply {
-                setOnCheckedChangeListener { group, id ->
-                    binding.repeat.text = AlarmRepeat.getNameTypePairs(requireContext())[id].first
-                    alarmItemViewModel.currentAlarm.value!!.repeat = id
-                    dismiss()
-                }
-            })
+            setContentView(
+                LineRadioGroup(
+                    requireContext(),
+                    AlarmRepeat.getNameTypePairs(requireContext())
+                ).apply {
+                    setOnCheckedChangeListener { group, id ->
+                        binding.repeat.text =
+                            AlarmRepeat.getNameTypePairs(requireContext())[id].first
+                        alarmItemViewModel.currentAlarm.value!!.repeat = id
+                        dismiss()
+                    }
+                })
             show()
         }
     }

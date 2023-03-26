@@ -25,8 +25,8 @@ class AlarmListViewModel @Inject constructor() : ViewModel() {
 
     suspend fun deletePickerAlarm() {
         val alarmList = alarms.value!!
-        for ((index, check) in checkList.reversed().withIndex()) {
-            if (check) {
+        for (index in (0..checkList.size - 1).reversed()) {
+            if (checkList[index]){
                 alarmDomain.removeAlarm(alarmList[index])
             }
         }

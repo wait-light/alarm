@@ -43,5 +43,4 @@ class ExampleUnitTest {
         return (((date.dayOfYear + 5) / 7) % 2) == 1
     }
 
-
 }
